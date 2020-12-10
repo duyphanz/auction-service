@@ -5,7 +5,7 @@
   "author": "Ariel Weinberger <ariel@codingly.io>",
   "license": "MIT",
   "scripts": {
-    "deploy": "yarn run sls deploy -v",
+    "deploy": "sls deploy -v",
     "lint": "yarn run eslint src/**"
   },
   "devDependencies": {
