@@ -1,3 +1,4 @@
+/* eslint-disable-next-line */
 async function hello(event, context) {
   return {
     statusCode: 200,
@@ -6,5 +7,3 @@ async function hello(event, context) {
 }
 
 export const handler = hello;
-
-
