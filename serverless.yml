@@ -15,40 +15,52 @@ provider:
   region: ap-southeast-1
   environment:
     AUCTION_TABLE_NAME: ${self:custom.AuctionsTable.name}
+    AUTH0_PUBLIC_KEY: ${file(secret.pem)}
   iamRoleStatements:
     - ${file(iam/AuctionsTableIAM.yml):AuctionsTableIAM}
 
 resources:
   Resources:
     AuctionsTable: ${file(resources/AuctionsTable.yml):AuctionsTable}
+    # This response is needed for custom authorizer failures cors support ¯\_(ツ)_/¯
+    GatewayResponse: ${file(resources/GatewayResponse.yml):GatewayResponse}
+    AuthFailureGatewayResponse: ${file(resources/AuthFailureGatewayResponse.yml):AuthFailureGatewayResponse}
     
 functions:
+  auth:
+    handler: src/handlers/auth.handler
+    cors: true
   createAuction:
     handler: src/handlers/createAuction.handler
     events:
       - http:
           method: POST
           path: /auction
+          authorizer: ${self:custom.authorizer}
   getAuctions:
     handler: src/handlers/getAuctions.handler
     events:
       - http:
           method: GET
           path: /auctions
+          authorizer: ${self:custom.authorizer}
   getAuction:
     handler: src/handlers/getAuction.handler
     events:
       - http:
           method: GET
           path: /auction/{id}
+          authorizer: ${self:custom.authorizer}
   placeBid:
     handler: src/handlers/placeBid.handler
     events:
       - http:
           method: PATCH
           path: /auction/{id}/bid
+          authorizer: ${self:custom.authorizer}
 
 custom:
+  authorizer: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:auction-service-${self:provider.stage}-auth
   AuctionsTable:
     name: !Ref AuctionsTable
     arn: !GetAtt AuctionsTable.Arn
